@@ -2,7 +2,6 @@
 
 import time
 import serial
-import atexit
 
 ser1 = serial.Serial(
     port='COM6',
@@ -37,11 +36,3 @@ while(True):
         print("ser2 <<" + out)
     else:
         print("Error")
-    
-
-def exit_handler():
-    print("Close communication")
-    ser1.close()
-    ser2.close()
-
-atexit.register(exit_handler)
