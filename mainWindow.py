@@ -73,6 +73,16 @@ class Sequence(Qtw.QFrame):
             self.actions["A"+self.i].setFrameShape(Qtw.QFrame.Panel)
             self.actions["A"+self.i].setLineWidth(5)
 
+class map(Qtw.QFrame):
+    def __init__(self):
+        super().__init__()
+        self.setFrameShadow(Qtw.QFrame.Plain)
+        self.setFrameShape(Qtw.QFrame.StyledPanel)
+        self.myLayout = Qtw.QHBoxLayout(self)
+        self.label_map = Qtw.QLabel()
+        self.myLayout.addWidget(self.label_map)
+        self.setLayout(self.myLayout)
+
 class Comm(Qtw.QFrame):
     def __init__(self):
         super().__init__()
@@ -156,6 +166,7 @@ class MainWindow(Qtw.QWidget):
     sendMessage=Qt.pyqtSignal(MessageID,int,int,int,int)
     def __init__(self):
         super().__init__()
+        self.setStyleSheet(open("./design_GUI.css").read())
         self.mainLayout=Qtw.QVBoxLayout(self)
         self.setLayout(self.mainLayout)
 
