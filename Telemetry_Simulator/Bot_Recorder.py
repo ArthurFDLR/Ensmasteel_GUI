@@ -34,7 +34,7 @@ print("\n\nStart recording :\n")
 TIME0 = time.time_ns()
 timeLast_ns = Time_ns()
 
-with open("Bot_Telemetry.csv", "w", newline='') as f:
+with open("Bot_Telemetry_BIS.csv", "w", newline='') as f:
     writer = csv.writer(f,delimiter=";")
     while True:
         try:

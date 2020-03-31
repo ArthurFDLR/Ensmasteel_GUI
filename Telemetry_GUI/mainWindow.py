@@ -166,7 +166,7 @@ class MainWindow(Qtw.QWidget):
     sendMessage=Qt.pyqtSignal(MessageID,int,int,int,int)
     def __init__(self):
         super().__init__()
-        self.setStyleSheet(open("./design_GUI.css").read())
+        #self.setStyleSheet(open("./design_GUI.css").read())
         self.mainLayout=Qtw.QVBoxLayout(self)
         self.setLayout(self.mainLayout)
 
