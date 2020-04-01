@@ -1,22 +1,29 @@
 from PyQt5 import QtWidgets as Qtw
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QPixmap
 from PyQt5 import QtCore as Qt
 from littleWidgets import LabeledValue
 from parseSerial import Parser
 from parseSerial import MessageID
+from map_generator import gen_map
 
 class CinetiqueW(Qtw.QFrame):
     def __init__(self,prefix):
         super().__init__()
         self.setFrameShadow(Qtw.QFrame.Plain)
         self.setFrameShape(Qtw.QFrame.StyledPanel)
-        self.myLayout=Qtw.QHBoxLayout(self)
+        self.myLayout=Qtw.QVBoxLayout(self)
         self.setLayout(self.myLayout)
         self.widgets={prefix+"x":LabeledValue("x",0,self) , prefix+"y":LabeledValue("y",0,self) , prefix+"Th":LabeledValue("theta",0,self) , prefix+"v":LabeledValue("v",0,self) , prefix+"w":LabeledValue("w",0,self)}
         if prefix=="R":
-            self.myLayout.addWidget(Qtw.QLabel("Robot:",self))
+            self.label_robot=Qtw.QLabel("Robot:")
+            self.label_robot.setAlignment(Qt.Qt.AlignCenter)
+            self.label_robot.setStyleSheet("QLabel {color:#E0FFFF; font-size:48px; font-style:bold;}")
+            self.myLayout.addWidget(self.label_robot)
         else:
-            self.myLayout.addWidget(Qtw.QLabel("Ghost:",self))
+            self.label_ghost = Qtw.QLabel("Ghost:")
+            self.label_ghost.setAlignment(Qt.Qt.AlignCenter)
+            self.label_ghost.setStyleSheet("QLabel {color:#E0FFFF; font-size:48px; font-style:bold;}")
+            self.myLayout.addWidget(self.label_ghost)
         for w in self.widgets.values():
             self.myLayout.addWidget(w)
     
@@ -73,7 +80,7 @@ class Sequence(Qtw.QFrame):
             self.actions["A"+self.i].setFrameShape(Qtw.QFrame.Panel)
             self.actions["A"+self.i].setLineWidth(5)
 
-class map(Qtw.QFrame):
+class map(Qtw.QFrame): # Pour  affichage de la carte
     def __init__(self):
         super().__init__()
         self.setFrameShadow(Qtw.QFrame.Plain)
@@ -82,6 +89,10 @@ class map(Qtw.QFrame):
         self.label_map = Qtw.QLabel()
         self.myLayout.addWidget(self.label_map)
         self.setLayout(self.myLayout)
+        pixmap = QPixmap("map_generated.png")
+        self.label_map.setPixmap(pixmap)
+        self.label_map.setAlignment(Qt.Qt.AlignCenter)
+
 
 class Comm(Qtw.QFrame):
     def __init__(self):
@@ -167,27 +178,39 @@ class MainWindow(Qtw.QWidget):
     def __init__(self):
         super().__init__()
         self.setStyleSheet(open("./design_GUI.css").read())
-        self.mainLayout=Qtw.QVBoxLayout(self)
+        self.mainLayout=Qtw.QGridLayout(self)
         self.setLayout(self.mainLayout)
+
+        self.label_title=Qtw.QLabel("ENSMASTEEL INTERFACE by Arthur & Moi")
+        self.label_title.setStyleSheet("QLabel {color : #2CF007;"
+                                       "font-family : Segoe UI; font-size: 78px;"
+                                       "text-align : center;}")
+        self.label_title.setAlignment(Qt.Qt.AlignCenter)
 
         self.buttonTirette = Qtw.QPushButton('Tirette', self)
         self.buttonTirette.clicked.connect(lambda : self.sendMessage.emit(MessageID.Tirette,0,0,0,0))
 
+        self.mapWidget=map()
         self.cinetiqueR=CinetiqueW("R")
+        self.cinetiqueR.setObjectName('cinetiqueR') # Pour utilisation dans le css
         self.cinetiqueG=CinetiqueW("G")
+        self.cinetiqueG.setObjectName('cinetiqueG') # Idem
         self.sequenceWidget=Sequence()
         self.commWidget=Comm()
         self.pidPanel=PidPanel(self.sendMessage)
 
-        self.mainLayout.addWidget(self.buttonTirette)
-        self.mainLayout.addWidget(self.cinetiqueR)
-        self.mainLayout.addWidget(self.cinetiqueG)
-        self.mainLayout.addWidget(self.sequenceWidget)
-        self.mainLayout.addWidget(self.commWidget)
+        self.mainLayout.addWidget(self.label_title,1,0,1,6)
+        self.mainLayout.addWidget(self.buttonTirette,2,0,1,4)
+        self.mainLayout.addWidget(self.mapWidget,3,0,4,4)
+        self.mainLayout.addWidget(self.cinetiqueR,2,4,5,1)
+        self.mainLayout.addWidget(self.cinetiqueG,2,5,5,1)
+        self.mainLayout.addWidget(self.sequenceWidget,8,0,1,6)
+        self.mainLayout.addWidget(self.commWidget,9,0,1,6)
 
         self.parserThread=Parser(self)
         self.parserThread.newTelem.connect(self.cinetiqueR.update)
         self.parserThread.newTelem.connect(self.cinetiqueG.update)
+        self.parserThread.newTelem.connect(self.mapWidget.update)
         self.parserThread.newTelem.connect(self.sequenceWidget.update)
         self.parserThread.newTelem.connect(self.commWidget.update)
         self.parserThread.newInfo.connect(print)
