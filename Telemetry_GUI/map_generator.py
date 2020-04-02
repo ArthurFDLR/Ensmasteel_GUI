@@ -4,6 +4,13 @@ from PIL import Image, ImageDraw
 def gen_map(X_R,Y_R,theta_R,X_G,Y_G,theta_G,State):
     hrobot = 70
     img_bg = Image.open("map_CFR2020.png")
+    fac = 100
+    X_R = int(X_R*fac)
+    Y_R = int(Y_R *fac)
+    theta_R = int(theta_R*fac)
+    X_G = int(X_G*fac)
+    Y_G = int(Y_G*fac)
+    theta_G = int(theta_G*fac)
     #  width, height = 895, 597
     if State == 0 : # Only Robot
         X_supleft, Y_supleft = X_R - hrobot // 2, Y_R - hrobot // 2

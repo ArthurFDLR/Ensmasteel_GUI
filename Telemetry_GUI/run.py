@@ -5,6 +5,7 @@ import sys
 app = QtWidgets.QApplication(sys.argv)
 mainWin = QtWidgets.QMainWindow()
 mainWin.setStyleSheet("QMainWindow {background-color : #333333; border : 5px solid #555555}") # css applique directement sur la fenetre
+mainWin.setWindowTitle("ENSMASTEEL INTERFACE")
 mainWid = MainWindow()
 mainWin.setCentralWidget(mainWid)
 mainWin.showMaximized() # Mettre l'application en plein écran (tout en conservant l'accès à la fermeture windows)

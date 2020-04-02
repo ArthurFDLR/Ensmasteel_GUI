@@ -1,4 +1,6 @@
 from PyQt5 import QtWidgets as Qtw
+from PyQt5 import QtCore as Qt
+
 
 class LabeledValue(Qtw.QFrame):
     def __init__(self,name,value,parent=None):
@@ -8,8 +10,12 @@ class LabeledValue(Qtw.QFrame):
         self.myLayout=Qtw.QHBoxLayout(self)
         self.setLayout(self.myLayout)
         self.labelName=Qtw.QLabel(name,self)
+        self.labelName.setAlignment(Qt.Qt.AlignCenter)
+        self.labelName.setStyleSheet("QLabel {font-family : Segoe UI; font-size : 24px;}")
         self.myLayout.addWidget(self.labelName)
         self.labelValue=Qtw.QLabel(str(value),self)
+        self.labelValue.setAlignment(Qt.Qt.AlignCenter)
+        self.labelValue.setStyleSheet("QLabel {font-family : Segoe UI; font-size : 24px;}")
         self.myLayout.addWidget(self.labelValue)
     
     def setValue(self,value):
