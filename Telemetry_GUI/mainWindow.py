@@ -5,7 +5,7 @@ from littleWidgets import LabeledValue
 from parseSerial import Parser
 from parseSerial import MessageID
 import map_generator
-
+from time import time
 class CinetiqueW(Qtw.QFrame):
     def __init__(self,prefix):
         super().__init__()
@@ -17,12 +17,12 @@ class CinetiqueW(Qtw.QFrame):
         if prefix=="R":
             self.label_robot=Qtw.QLabel("Robot:")
             self.label_robot.setAlignment(Qt.Qt.AlignCenter)
-            self.label_robot.setStyleSheet("QLabel {color:#E0FFFF; font-size:48px; font-style:bold;}")
+            self.label_robot.setStyleSheet("QLabel {color:#2CF007; font-size:48px; font-style:bold;}")
             self.myLayout.addWidget(self.label_robot)
         else:
             self.label_ghost = Qtw.QLabel("Ghost:")
             self.label_ghost.setAlignment(Qt.Qt.AlignCenter)
-            self.label_ghost.setStyleSheet("QLabel {color:#E0FFFF; font-size:48px; font-style:bold;}")
+            self.label_ghost.setStyleSheet("QLabel {color:cyan; font-size:48px; font-style:bold;}")
             self.myLayout.addWidget(self.label_ghost)
         for w in self.widgets.values():
             self.myLayout.addWidget(w)
@@ -93,11 +93,8 @@ class map(Qtw.QFrame): # Pour  affichage de la carte
         self.label_map = Qtw.QLabel()
         self.myLayout.addWidget(self.label_map)
         self.setLayout(self.myLayout)
-        pixmap = QPixmap("map_generated.png")
-        self.label_map.setPixmap(pixmap)
-        self.label_map.setAlignment(Qt.Qt.AlignCenter)
 
-    def update(self, newData: dict): # Ce qui marche probablement pas (Mais je suis sur que tu maurais donne plus de temps jaurais reussi CONNARD)
+    def update(self, newData: dict):
         for k, v in newData.items():
             if k[0]=="R":
                 if k[1]=="x":
@@ -116,10 +113,15 @@ class map(Qtw.QFrame): # Pour  affichage de la carte
                     self.Y_G = float(v)
                 if k[1] == "T":
                     self.Th_G = float(v)
-        map_generator.gen_map(self.X_R,self.Y_R,self.Th_R,self.X_G,self.Y_G,self.Th_G,self.State)
-        pixmap = QPixmap("map_generated.png")
-        self.label_map.setPixmap(pixmap)
-        self.label_map.setAlignment(Qt.Qt.AlignCenter)
+                    map_generator.gen_map(self.X_R,self.Y_R,self.Th_R,self.X_G,self.Y_G,self.Th_G,self.State)
+                    pixmap = QPixmap("map_generated.png")
+                    self.label_map.setPixmap(pixmap)
+                    self.label_map.setFixedSize(600,400)
+                    self.label_map.setStyleSheet("QLabel {background-image:url('map_CFR2020.png');}")
+                    self.label_map.setAlignment(Qt.Qt.AlignCenter)
+
+    def updateState(self, state:int):
+        self.State=state
 
 class MySwitch_R_G(Qtw.QPushButton):
     def __init__(self, parent = None):
@@ -129,11 +131,11 @@ class MySwitch_R_G(Qtw.QPushButton):
         self.setMinimumHeight(22)
 
     def paintEvent(self, event):
-        label = "R" if self.isChecked() else "G"
+        label = "Robot" if self.isChecked() else "Ghost"
         bg_color = Qt.Qt.green if self.isChecked() else Qt.Qt.cyan
 
-        radius = 10
-        width = 32
+        radius = 14
+        width = 110
         center = self.rect().center()
 
         painter = QPainter(self)
@@ -161,11 +163,11 @@ class MySwitch_2(Qtw.QPushButton):
         self.setMinimumHeight(22)
 
     def paintEvent(self, event):
-        label = "2" if self.isChecked() else "1"
-        bg_color = Qt.Qt.green if self.isChecked() else Qt.Qt.cyan
+        label = "Combiné" if self.isChecked() else "Seul"
+        bg_color = Qt.Qt.darkMagenta if self.isChecked() else Qt.Qt.darkCyan
 
-        radius = 10
-        width = 32
+        radius = 14
+        width = 110
         center = self.rect().center()
 
         painter = QPainter(self)
@@ -186,6 +188,7 @@ class MySwitch_2(Qtw.QPushButton):
         painter.drawText(sw_rect, Qt.Qt.AlignCenter, label)
 
 class State_settings(Qtw.QFrame):
+    argumentSig = Qt.pyqtSignal(int)
     def __init__(self):
         super().__init__()
         self.setFrameShadow(Qtw.QFrame.Plain)
@@ -201,13 +204,14 @@ class State_settings(Qtw.QFrame):
 
     def statebutton(self):
         if self.check_one_two.isChecked():
-            self.State=2
+            self.check_robot_ghost.setHidden(True)
+            self.argumentSig.emit(2)
         else:
+            self.check_robot_ghost.setHidden(False)
             if self.check_robot_ghost.isChecked():
-                self.State=1
+                self.argumentSig.emit(1)
             else:
-                self.State=0
-
+                self.argumentSig.emit(0)
 
 class Comm(Qtw.QFrame):
     def __init__(self):
@@ -236,15 +240,22 @@ class PidUnit(Qtw.QFrame):
         self.which=which
         self.setFrameShadow(Qtw.QFrame.Plain)
         self.setFrameShape(Qtw.QFrame.StyledPanel)
+        self.setStyleSheet("QFrame {background-color:#555555;}")
 
         self.myLayout=Qtw.QVBoxLayout(self)
         self.setLayout(self.myLayout)
         self.btnUp=Qtw.QPushButton("++")
         self.lab=Qtw.QLabel("P")
+        self.lab.setStyleSheet("QLabel {font-size:24px; font-family:Segoe UI;}")
+        self.lab.setAlignment(Qt.Qt.AlignCenter)
         if which==1:
             self.lab=Qtw.QLabel("I")
+            self.lab.setStyleSheet("QLabel {font-size:24px; font-family:Segoe UI;}")
+            self.lab.setAlignment(Qt.Qt.AlignCenter)
         elif which==2:
             self.lab=Qtw.QLabel("D")
+            self.lab.setStyleSheet("QLabel {font-size:24px; font-family:Segoe UI;}")
+            self.lab.setAlignment(Qt.Qt.AlignCenter)
 
         self.btnDown=Qtw.QPushButton("--")
         self.myLayout.addWidget(self.btnUp)
@@ -259,12 +270,17 @@ class PidGroup(Qtw.QFrame):
         self.translation=translation
         self.setFrameShadow(Qtw.QFrame.Plain)
         self.setFrameShape(Qtw.QFrame.StyledPanel)
+        self.setStyleSheet("QFrame {background-color:#777777;}")
         self.myLayout=Qtw.QVBoxLayout(self)
         self.setLayout(self.myLayout)
         if translation:
             self.label=Qtw.QLabel("TRANSLATION")
+            self.label.setStyleSheet("QLabel {font-size:36px; font-family:Segoe UI;}")
+            self.label.setAlignment(Qt.Qt.AlignCenter)
         else:
             self.label=Qtw.QLabel("ROTATION")
+            self.label.setStyleSheet("QLabel {font-size:36px; font-family:Segoe UI;}")
+            self.label.setAlignment(Qt.Qt.AlignCenter)
         self.myLayout.addWidget(self.label)
 
         self.group=Qtw.QWidget(self)
@@ -318,16 +334,17 @@ class MainWindow(Qtw.QWidget):
         self.commWidget=Comm()
         self.pidPanel=PidPanel(self.sendMessage)
         self.stateSetting=State_settings()
+        self.stateSetting.argumentSig.connect(self.mapWidget.updateState)
 
         self.mainLayout.addWidget(self.label_title,1,0,1,6)
-        self.mainLayout.addWidget(self.buttonTirette,2,0,1,3)
-        self.mainLayout.addWidget(self.stateSetting,2,3,1,1)
+        self.mainLayout.addWidget(self.buttonTirette,2,0,1,2)
+        self.mainLayout.addWidget(self.stateSetting,2,2,1,2)
         self.mainLayout.addWidget(self.mapWidget,3,0,4,4)
         self.mainLayout.addWidget(self.cinetiqueR,2,4,5,1)
         self.mainLayout.addWidget(self.cinetiqueG,2,5,5,1)
         self.mainLayout.addWidget(self.sequenceWidget,8,0,1,6)
         self.mainLayout.addWidget(self.commWidget,9,0,1,6)
-
+        self.mainLayout.addWidget(self.pidPanel,10,0,1,6)
         self.parserThread=Parser(self)
         self.parserThread.newTelem.connect(self.cinetiqueR.update)
         self.parserThread.newTelem.connect(self.cinetiqueG.update)

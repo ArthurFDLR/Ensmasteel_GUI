@@ -1,16 +1,18 @@
 QFrame {
     background-color : #333333;
-    color : #2CF007;
     border : 0px;
+    color : #E0FFFF;
 }
 
 QFrame#cinetiqueR {
-    background-color : #333333;
-    border : 4px solid #E0FFFF;
+    border : 4px solid #2CF007;
 }
 
 QFrame#cinetiqueG {
-    background-color : #333333;
+    border : 4px solid cyan;
+}
+
+QFrame#pidPanel {
     border : 4px solid #E0FFFF;
 }
 
